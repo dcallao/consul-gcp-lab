@@ -109,6 +109,7 @@ In order to re-deploy all of the containers on the demo host, run the following:
 ```
 $ cd /tmp
 $ docker rm -f $(docker ps -a -q)
+$ pkill docker-compose
 $ nohup docker-compose -p demo up &
 $ docker ps -a
 ```
