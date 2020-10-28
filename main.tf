@@ -4,11 +4,7 @@ data "google_compute_image" "consul_image" {
 }
 
 resource "google_compute_network" "default" {
-  name = "default"
-}
-
-locals {
-  network = var.network == "" ? google_compute_network.default.name : var.network
+  name = var.network == "" ? "default" : var.network
 }
 
 resource "random_id" "environment_name" {
@@ -17,7 +13,7 @@ resource "random_id" "environment_name" {
 
 resource "google_compute_firewall" "allow_consul" {
   name    = "allow-consul"
-  network = local.network
+  network = google_compute_network.default.name
   project = var.project_name
 
   allow {
@@ -33,7 +29,7 @@ resource "google_compute_firewall" "allow_consul" {
 
 resource "google_compute_firewall" "allow_consul_health_checks" {
   name    = "allow-vault-consul-health-check"
-  network = local.network
+  network = google_compute_network.default.name
   project = var.project_name
 
   allow {
@@ -41,6 +37,18 @@ resource "google_compute_firewall" "allow_consul_health_checks" {
     ports    = ["8500"]
   }
   source_ranges = var.gcp_health_check_cidr
+}
+
+resource "google_compute_firewall" "allow_ssh" {
+  name    = "allow-ssh"
+  network = google_compute_network.default.name
+  project = var.project_name
+
+  allow {
+    protocol = "tcp"
+    ports    = ["22"]
+  }
+  source_ranges = var.allowed_inbound_cidrs
 }
 
 data "template_file" "install_consul" {
@@ -52,14 +60,13 @@ data "template_file" "install_consul" {
     environment_name       = random_id.environment_name.hex
     datacenter             = var.datacenter
     bootstrap_expect       = var.consul_nodes
-    consul_cluster_version = var.consul_cluster_version
-    redundancy_zones       = var.redundancy_zones
-    bootstrap              = var.bootstrap
+    bootstrap_docker       = var.bootstrap_docker
+    bootstrap_consul       = var.bootstrap_consul
   }
 }
 
 resource "google_compute_instance" "consul" {
-  name         = "consul-test${count.index}"
+  name         = "demo-consul-server${count.index}"
   machine_type = var.machine_type
   zone         = var.zone
   count        = var.consul_nodes
@@ -79,8 +86,7 @@ resource "google_compute_instance" "consul" {
   }
 
   network_interface {
-    #network       = google_compute_network.default.name
-    network       = local.network
+    network       = google_compute_network.default.name
     access_config {}
   }
 

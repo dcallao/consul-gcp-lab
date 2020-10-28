@@ -39,11 +39,18 @@ variable "consul_nodes" {
   description = "Number of Consul instances"
 }
 
-variable "bootstrap" {
+variable "bootstrap_consul" {
+  type        = bool
+  default     = false
+  description = "Initial Consul bootstrap configurations"
+}
+
+variable "bootstrap_docker" {
   type        = bool
   default     = true
-  description = "Initial Bootstrap configurations"
+  description = "Initial Consul and clients docker bootstrap configurations"
 }
+
 
 variable "redundancy_zones" {
   type        = bool
