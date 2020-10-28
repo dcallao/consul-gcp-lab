@@ -20,7 +20,7 @@ The demo uses docker and  Terraform to create the infrastructure and launch the 
         account="my-service-account"
 
         gcloud iam service-accounts create ${account} \
-            --display-name "Heat Clinic Service Account" \
+            --display-name "Demo Lab Service Account" \
             --project ${project}
 
         for role in iam.serviceAccountUser compute.instanceAdmin.v1 compute.networkAdmin compute.securityAdmin
