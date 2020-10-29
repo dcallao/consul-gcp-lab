@@ -1,6 +1,6 @@
 variable "project_name" {
   type        = string
-  default     = "heat-clinic-demo2"
+  default     = "my-project"
   description = "Name of the GCP project to create resources in."
 }
 
@@ -30,7 +30,7 @@ variable "datacenter" {
 
 variable "network" {
   type        = string
-  default     = "test-network"
+  default     = "my-network"
   description = "Network to use."
 }
 
