@@ -60,8 +60,8 @@ data "template_file" "install_consul" {
     environment_name       = random_id.environment_name.hex
     datacenter             = var.datacenter
     bootstrap_expect       = var.consul_nodes
-    bootstrap_docker       = var.bootstrap_docker
-    bootstrap_consul       = var.bootstrap_consul
+    bootstrap_docker       = var.bootstrap_docker_consul_container
+    bootstrap_consul       = var.ootstrap_consul_vm
   }
 }
 

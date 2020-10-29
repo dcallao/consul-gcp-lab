@@ -1,6 +1,6 @@
 variable "project_name" {
   type        = string
-  default     = "my-project"
+  default     = "heat-clinic-demo1"
   description = "Name of the GCP project to create resources in."
 }
 
@@ -39,16 +39,16 @@ variable "consul_nodes" {
   description = "Number of Consul instances"
 }
 
-variable "bootstrap_consul" {
+variable "bootstrap_consul_vm" {
   type        = bool
   default     = false
-  description = "Initial Consul bootstrap configurations"
+  description = "Initial Consul on VM bootstrap configurations"
 }
 
-variable "bootstrap_docker" {
+variable "bootstrap_docker_consul_container" {
   type        = bool
   default     = true
-  description = "Initial Consul and clients docker bootstrap configurations"
+  description = "Initial docker Consul and clients bootstrap configurations"
 }
 
 
