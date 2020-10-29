@@ -8,7 +8,8 @@ The demo uses docker and  Terraform to create the infrastructure and launch the 
 ## Prerequisites
 
  * Install `terraform` binary
- * Install and configure `gcloud sdk` 
+ * Install and configure `gcloud sdk`
+ * Create project in GCP account and set `gcloud` to that project  (i.e. `gcloud config set project my-project`)
 
 ## Installing in GCP (Google Cloud)
 
