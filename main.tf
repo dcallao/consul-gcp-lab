@@ -61,7 +61,7 @@ data "template_file" "install_consul" {
     datacenter             = var.datacenter
     bootstrap_expect       = var.consul_nodes
     bootstrap_docker       = var.bootstrap_docker_consul_container
-    bootstrap_consul       = var.ootstrap_consul_vm
+    bootstrap_consul       = var.bootstrap_consul_vm
   }
 }
 

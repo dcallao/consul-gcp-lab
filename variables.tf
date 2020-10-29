@@ -1,6 +1,6 @@
 variable "project_name" {
   type        = string
-  default     = "heat-clinic-demo1"
+  default     = "my-project"
   description = "Name of the GCP project to create resources in."
 }
 
@@ -49,13 +49,6 @@ variable "bootstrap_docker_consul_container" {
   type        = bool
   default     = true
   description = "Initial docker Consul and clients bootstrap configurations"
-}
-
-
-variable "redundancy_zones" {
-  type        = bool
-  default     = false
-  description = "Leverage Redundancy Zones within Consul for additional non-voting nodes."
 }
 
 variable "consul_cluster_version" {

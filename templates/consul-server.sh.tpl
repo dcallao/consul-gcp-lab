@@ -240,6 +240,7 @@ networks:
     external: false
     driver: bridge
 EOF
+
 cat << EOF > /tmp/bootstrap_docker_server_clients.sh
 #!/bin/bash
 echo "Bootstraping docker server and clients..."
