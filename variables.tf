@@ -1,6 +1,6 @@
 variable "project_name" {
   type        = string
-  default     = "my-project"
+  default     = "my-demo"
   description = "Name of the GCP project to create resources in."
 }
 

@@ -9,11 +9,11 @@ The demo uses docker and  Terraform to create the infrastructure and launch the 
 
  * Install `terraform` binary
  * Install and configure `gcloud sdk`
- * Create project in GCP account and set `gcloud` to that project  (i.e. `gcloud config set project my-project`)
+ * Create project in GCP account and set `gcloud` to that project  (i.e. `gcloud config set project my-demo`)
 
 ## Installing in GCP (Google Cloud)
 
- 1. Create a new project to house your demo. In this example, I call my project `my-demo`.
+ 1. Create a new project to house your demo. In this example, I call my project `my-demo`. The `my-demo` is a project id, you can use the command `gcloud projects list` to get the project ID for `my-demo`. 
 
  2. Create a service account that has the "Compute Instance Admin (v1)" and "Compute Security Admin" roles. Download the account credentials as a JSON file. This can be done through the UI or through the `gcloud` command line tool, e.g.:
 
@@ -38,7 +38,15 @@ The demo uses docker and  Terraform to create the infrastructure and launch the 
 
         export GOOGLE_APPLICATION_CREDENTIALS=my-service-account-key.json
 
- 4. Use Terraform to create the GCE instances, firewall rules, and Consul Connect intentions.
+ 4. Modify the variables.tf file to reflect the project id. 
+
+      variable "project_name" {
+        type        = string
+        default     = "my-demo"
+        description = "Name of the GCP project to create resources in."
+      }
+
+ 5. Use Terraform to create the GCE instances, firewall rules, and Consul Connect intentions.
 
         terraform init
         terraform plan
@@ -48,7 +56,7 @@ The demo uses docker and  Terraform to create the infrastructure and launch the 
 
         Apply complete! Resources: 6 added, 0 changed, 0 destroyed.
 
- 5. You can see the public IP addresses and URL's for your demo by inspecting the Terraform output:
+ 6. You can see the public IP addresses and URL's for your demo by inspecting the Terraform output:
 
         Outputs:
 
@@ -58,7 +66,7 @@ The demo uses docker and  Terraform to create the infrastructure and launch the 
 **Note:** It may take a minute or two for the site to become available, as the JVM needs to create all the database objects.
 
 ## Registering and Deregistering Services and Intentions
-Once Terraform finishes executing, you will need to `ssh` in to the demo Consul VM that has  been deployed into the environent to register or deregister the services.
+Once Terraform finishes executing, you should have a working consul lab enviroment. You can `ssh` in to the demo Consul VM that has been deployed into the environent to register or deregister the services.
 
 ```
 $ gcloud compute ssh demo-consul-server0 
@@ -66,38 +74,51 @@ $ sudo su
 $ cd /tmp
 $ docker ps -a
 CONTAINER ID        IMAGE                                         COMMAND                  CREATED             STATUS              PORTS                                                                      NAMES
-7804998db78e        nicholasjackson/consul_connect_agent:latest   "consul agent -confi…"   About an hour ago   Up About an hour    8300-8302/tcp, 8500/tcp, 8301-8302/udp, 8600/tcp, 8600/udp                 demo_postgres_1
-83d455cac28f        nicholasjackson/consul_connect_agent:latest   "consul agent -confi…"   About an hour ago   Up About an hour    8300-8302/tcp, 8500/tcp, 8301-8302/udp, 8600/tcp, 8600/udp                 demo_service1_1
-d072b017f67a        nicholasjackson/consul_connect_agent:latest   "consul agent -confi…"   About an hour ago   Up About an hour    8300-8302/tcp, 8500/tcp, 8301-8302/udp, 8600/tcp, 8600/udp                 demo_service2_1
-dbc84740f511        nicholasjackson/consul_connect:latest         "/bin/sh -c 'consul …"   About an hour ago   Up About an hour    8300-8302/tcp, 8301-8302/udp, 8600/tcp, 8600/udp, 0.0.0.0:8500->8500/tcp   demo_consul_server_1
+e802b501c523        nicholasjackson/consul_connect_agent:latest   "consul agent -confi…"   33 minutes ago      Up 33 minutes       8300-8302/tcp, 8500/tcp, 8301-8302/udp, 8600/tcp, 8600/udp                 demo_web1_1
+92d1631390f7        nicholasjackson/consul_connect_agent:latest   "consul agent -confi…"   33 minutes ago      Up 33 minutes       8300-8302/tcp, 8500/tcp, 8301-8302/udp, 8600/tcp, 8600/udp                 demo_db2_1
+5fe85d6cc4ee        nicholasjackson/consul_connect_agent:latest   "consul agent -confi…"   33 minutes ago      Up 33 minutes       8300-8302/tcp, 8500/tcp, 8301-8302/udp, 8600/tcp, 8600/udp                 demo_app3_1
+e4578ae725ef        nicholasjackson/consul_connect:latest         "/bin/sh -c 'consul …"   33 minutes ago      Up 33 minutes       8300-8302/tcp, 8301-8302/udp, 8600/tcp, 8600/udp, 0.0.0.0:8500->8500/tcp   demo_consul_server_1
+b36914ea2335        nicholasjackson/consul_connect_agent:latest   "consul agent -confi…"   33 minutes ago      Up 33 minutes       8300-8302/tcp, 8500/tcp, 8301-8302/udp, 8600/tcp, 8600/udp                 demo_db1_1
+108254b3039f        nicholasjackson/consul_connect_agent:latest   "consul agent -confi…"   33 minutes ago      Up 33 minutes       8300-8302/tcp, 8500/tcp, 8301-8302/udp, 8600/tcp, 8600/udp                 demo_web2_1
+8edffe0a66c3        nicholasjackson/consul_connect_agent:latest   "consul agent -confi…"   33 minutes ago      Up 33 minutes       8300-8302/tcp, 8500/tcp, 8301-8302/udp, 8600/tcp, 8600/udp                 demo_web3_1
+472438a815d9        nicholasjackson/consul_connect_agent:latest   "consul agent -confi…"   33 minutes ago      Up 33 minutes       8300-8302/tcp, 8500/tcp, 8301-8302/udp, 8600/tcp, 8600/udp                 demo_app2_1
+5b8951940d35        nicholasjackson/consul_connect_agent:latest   "consul agent -confi…"   33 minutes ago      Up 33 minutes       8300-8302/tcp, 8500/tcp, 8301-8302/udp, 8600/tcp, 8600/udp                 demo_app1_1
 ```
 * Registering services
   ```
-  # Register postgres service
-  docker exec -it demo_postgres_1 curl -s -X PUT -d @/postgres.json "http://127.0.0.1:8500/v1/agent/service/register"
-
-  # Register service 2
-  docker exec -it demo_service2_1 curl -s -X PUT -d @/service2.json "http://127.0.0.1:8500/v1/agent/service/register"
-
-  # Register service 1
-  docker exec -it demo_service1_1 curl -s -X PUT -d @/service1.json "http://127.0.0.1:8500/v1/agent/service/register"
+  # Register Web Services
+  docker exec -it demo_web1_1 curl -s -X PUT -d @/web1.json "http://127.0.0.1:8500/v1/agent/service/register"
+  docker exec -it demo_web2_1 curl -s -X PUT -d @/web2.json "http://127.0.0.1:8500/v1/agent/service/register"
+  docker exec -it demo_web3_1 curl -s -X PUT -d @/web3.json "http://127.0.0.1:8500/v1/agent/service/register"
+  # Register App Services
+  docker exec -it demo_app1_1 curl -s -X PUT -d @/app1.json "http://127.0.0.1:8500/v1/agent/service/register"
+  docker exec -it demo_app2_1 curl -s -X PUT -d @/app2.json "http://127.0.0.1:8500/v1/agent/service/register"
+  docker exec -it demo_app3_1 curl -s -X PUT -d @/app3.json "http://127.0.0.1:8500/v1/agent/service/register"
+  # Register DB Services
+  docker exec -it demo_db1_1 curl -s -X PUT -d @/db1.json "http://127.0.0.1:8500/v1/agent/service/register"
+  docker exec -it demo_db2_1 curl -s -X PUT -d @/db2.json "http://127.0.0.1:8500/v1/agent/service/register"
   ```
 * Deregistering services
   ```
   # Deregister postgres service
-  docker exec -it demo_postgres_1 curl -s -X PUT "http://127.0.0.1:8500/v1/agent/service/deregister/postgres"
+  docker exec -it demo_web1_1 curl -s -X PUT "http://127.0.0.1:8500/v1/agent/service/deregister/web"
+  docker exec -it demo_web2_1 curl -s -X PUT "http://127.0.0.1:8500/v1/agent/service/deregister/web"
+  docker exec -it demo_web3_1 curl -s -X PUT "http://127.0.0.1:8500/v1/agent/service/deregister/web"
 
   # Deregister service 2
-  docker exec -it demo_service2_1 curl -s -X PUT "http://127.0.0.1:8500/v1/agent/service/deregister/service1"
+  docker exec -it demo_app1_1 curl -s -X PUT "http://127.0.0.1:8500/v1/agent/service/deregister/app"
+  docker exec -it demo_app2_1 curl -s -X PUT "http://127.0.0.1:8500/v1/agent/service/deregister/app"
+  docker exec -it demo_app3_1 curl -s -X PUT "http://127.0.0.1:8500/v1/agent/service/deregister/app"
 
   # Deregister service 1
-  docker exec -it demo_service1_1 curl -s -X PUT "http://127.0.0.1:8500/v1/agent/service/deregister/service2"
+  docker exec -it demo_db1_1 curl -s -X PUT "http://127.0.0.1:8500/v1/agent/service/deregister/db"
+  docker exec -it demo_db2_1 curl -s -X PUT "http://127.0.0.1:8500/v1/agent/service/deregister/db"
   ```
   If the above does not work, you will need to stop the container that the service lives
   ```
-  docker stop demo_postgres_1
-  docker stop demo_service1_1
-  docker stop demo_service2_1
+  docker stop demo_web1_1
+  docker stop demo_app1_1
+  docker stop demo_db1_1
   ```
 * Adding intentions
   ```

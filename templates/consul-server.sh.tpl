@@ -130,55 +130,75 @@ chmod 700 /tmp/bootstrap_consul.sh
 
 # Bootstrap Docker Server & Clients
 %{ if bootstrap_docker }
-cat << EOF > /tmp/connect_postgres.json
+cat << EOF > /tmp/connect_web1.json
 {
-  "name": "postgres",
-  "port": 5432,
-  "connect": {
-    "proxy": {
-      "config": {
-        "bind_port": 443
-      }
-    }
-  }
+    "name": "web",
+    "id": "web1",
+    "port": 80,
+    "connect": {}
 }
 EOF
 
-cat << EOF > /tmp/connect_service1.json
+cat << EOF > /tmp/connect_web2.json
 {
-  "name": "service1",
-  "port": 8080,
-  "connect": {
-    "proxy": {
-      "config": {
-        "bind_port": 8443,
-        "upstreams": [
-          {
-            "destination_name": "service2",
-            "local_bind_port": 9191
-          },
-          {
-            "destination_name": "postgres",
-            "local_bind_port": 5432
-          }
-        ]
-      }
-    }
-  }
+    "name": "web",
+    "id": "web2",
+    "port": 80,
+    "connect": {}
 }
 EOF
 
-cat << EOF > /tmp/connect_service2.json
+cat << EOF > /tmp/connect_web3.json
 {
-  "name": "service2",
-  "port": 8080,
-  "connect": {
-    "proxy": {
-      "config": {
-        "bind_port": 443
-      }
-    }
-  }
+    "name": "web",
+    "id": "web3",
+    "port": 80,
+    "connect": {}
+}
+EOF
+
+cat << EOF > /tmp/connect_app1.json
+{
+    "name": "app",
+    "id": "app1",
+    "port": 5000,
+    "connect": {}
+}
+EOF
+
+cat << EOF > /tmp/connect_app2.json
+{
+    "name": "app",
+    "id": "app2",
+    "port": 5000,
+    "connect": {}
+}
+EOF
+
+cat << EOF > /tmp/connect_app3.json
+{
+    "name": "app",
+    "id": "app3",
+    "port": 5000,
+    "connect": {}
+}
+EOF
+
+cat << EOF > /tmp/connect_db1.json
+{
+    "name": "db",
+    "id": "db1",
+    "port": 1434,
+    "connect": {}
+}
+EOF
+
+cat << EOF > /tmp/connect_db2.json
+{
+    "name": "db",
+    "id": "db2",
+    "port": 1434,
+    "connect": {}
 }
 EOF
 
@@ -195,24 +215,11 @@ services:
       - "8500:8500"
     networks:
       connect_network: {}
-  
-  service1:
+
+  web1:
     image: nicholasjackson/consul_connect_agent:latest
     volumes:
-      - "./connect_service1.json:/service1.json"
-    networks:
-      connect_network: {}
-    environment:
-      CONSUL_BIND_INTERFACE: eth0
-      CONSUL_CLIENT_INTERFACE: eth0
-    command:
-      - "-retry-join"
-      - "consul_server"
-  
-  service2:
-    image: nicholasjackson/consul_connect_agent:latest
-    volumes:
-      - "./connect_service2.json:/service2.json"
+      - "./connect_web1.json:/web1.json"
     networks:
       connect_network: {}
     environment:
@@ -222,10 +229,88 @@ services:
       - "-retry-join"
       - "consul_server"
 
-  postgres:
+  web2:
     image: nicholasjackson/consul_connect_agent:latest
     volumes:
-      - "./connect_postgres.json:/postgres.json"
+      - "./connect_web2.json:/web2.json"
+    networks:
+      connect_network: {}
+    environment:
+      CONSUL_BIND_INTERFACE: eth0
+      CONSUL_CLIENT_INTERFACE: eth0
+    command:
+      - "-retry-join"
+      - "consul_server"
+
+  web3:
+    image: nicholasjackson/consul_connect_agent:latest
+    volumes:
+      - "./connect_web3.json:/web3.json"
+    networks:
+      connect_network: {}
+    environment:
+      CONSUL_BIND_INTERFACE: eth0
+      CONSUL_CLIENT_INTERFACE: eth0
+    command:
+      - "-retry-join"
+      - "consul_server"
+ 
+  app1:
+    image: nicholasjackson/consul_connect_agent:latest
+    volumes:
+      - "./connect_app1.json:/app1.json"
+    networks:
+      connect_network: {}
+    environment:
+      CONSUL_BIND_INTERFACE: eth0
+      CONSUL_CLIENT_INTERFACE: eth0
+    command:
+      - "-retry-join"
+      - "consul_server"
+
+  app2:
+    image: nicholasjackson/consul_connect_agent:latest
+    volumes:
+      - "./connect_app2.json:/app2.json"
+    networks:
+      connect_network: {}
+    environment:
+      CONSUL_BIND_INTERFACE: eth0
+      CONSUL_CLIENT_INTERFACE: eth0
+    command:
+      - "-retry-join"
+      - "consul_server"
+
+  app3:
+    image: nicholasjackson/consul_connect_agent:latest
+    volumes:
+      - "./connect_app3.json:/app3.json"
+    networks:
+      connect_network: {}
+    environment:
+      CONSUL_BIND_INTERFACE: eth0
+      CONSUL_CLIENT_INTERFACE: eth0
+    command:
+      - "-retry-join"
+      - "consul_server"
+
+  db1:
+    image: nicholasjackson/consul_connect_agent:latest
+    volumes:
+      - "./connect_db1.json:/db1.json"
+    networks:
+      connect_network: {}
+    environment:
+      CONSUL_BIND_INTERFACE: eth0
+      CONSUL_CLIENT_INTERFACE: eth0
+    command:
+      - "-retry-join"
+      - "consul_server"
+
+  db2:
+    image: nicholasjackson/consul_connect_agent:latest
+    volumes:
+      - "./connect_db2.json:/db2.json"
     networks:
       connect_network: {}
     environment:
@@ -240,7 +325,6 @@ networks:
     external: false
     driver: bridge
 EOF
-
 cat << EOF > /tmp/bootstrap_docker_server_clients.sh
 #!/bin/bash
 echo "Bootstraping docker server and clients..."
@@ -248,22 +332,26 @@ cd /tmp/
 # Start docker compose
 nohup docker-compose -p demo up &
 
-# Register postgres service
-docker exec -it demo_postgres_1 curl -s -X PUT -d @/postgres.json "http://127.0.0.1:8500/v1/agent/service/register"
+sleep 30
 
-# Register service 2
-docker exec -it demo_service2_1 curl -s -X PUT -d @/service2.json "http://127.0.0.1:8500/v1/agent/service/register"
+# Register web services
+/usr/bin/docker exec -t demo_web1_1 curl -s -X PUT -d @/web1.json "http://127.0.0.1:8500/v1/agent/service/register"
+/usr/bin/docker exec -t demo_web2_1 curl -s -X PUT -d @/web2.json "http://127.0.0.1:8500/v1/agent/service/register"
 
-# Register service 1
-docker exec -it demo_service1_1 curl -s -X PUT -d @/service1.json "http://127.0.0.1:8500/v1/agent/service/register"
+# Register app services
+/usr/bin/docker exec -t demo_app1_1 curl -s -X PUT -d @/app1.json "http://127.0.0.1:8500/v1/agent/service/register"
+/usr/bin/docker exec -t demo_app2_1 curl -s -X PUT -d @/app2.json "http://127.0.0.1:8500/v1/agent/service/register"
+
+# Register db services
+/usr/bin/docker exec -t demo_db1_1 curl -s -X PUT -d @/db1.json "http://127.0.0.1:8500/v1/agent/service/register"
+/usr/bin/docker exec -t demo_db2_1 curl -s -X PUT -d @/db2.json "http://127.0.0.1:8500/v1/agent/service/register"
 
 # Set up consul intentions
-consul intention create -allow service1 service2
-consul intention create -allow service1 postgres
+consul intention create -allow web app
+consul intention create -allow app db
 
-else
-  echo "Bootstrap already completed"
-fi
+echo "Bootstrap already completed" >> /tmp/bootstrap.log
+
 EOF
 
 chmod 700 /tmp/bootstrap_docker_server_clients.sh
