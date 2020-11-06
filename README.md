@@ -40,11 +40,11 @@ The demo uses docker and  Terraform to create the infrastructure and launch the 
 
  4. Modify the variables.tf file to reflect the project id. 
 
-      variable "project_name" {
-        type        = string
-        default     = "my-demo"
-        description = "Name of the GCP project to create resources in."
-      }
+        variable "project_name" {
+          type        = string
+          default     = "my-demo"
+          description = "Name of the GCP project to create resources in."
+        }
 
  5. Use Terraform to create the GCE instances, firewall rules, and Consul Connect intentions.
 
