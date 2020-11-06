@@ -86,31 +86,31 @@ b36914ea2335        nicholasjackson/consul_connect_agent:latest   "consul agent 
 ```
 * Registering services
   ```
-  # Register Web Services
+  # Register Web services
   docker exec -it demo_web1_1 curl -s -X PUT -d @/web1.json "http://127.0.0.1:8500/v1/agent/service/register"
   docker exec -it demo_web2_1 curl -s -X PUT -d @/web2.json "http://127.0.0.1:8500/v1/agent/service/register"
   docker exec -it demo_web3_1 curl -s -X PUT -d @/web3.json "http://127.0.0.1:8500/v1/agent/service/register"
-  # Register App Services
+  # Register App services
   docker exec -it demo_app1_1 curl -s -X PUT -d @/app1.json "http://127.0.0.1:8500/v1/agent/service/register"
   docker exec -it demo_app2_1 curl -s -X PUT -d @/app2.json "http://127.0.0.1:8500/v1/agent/service/register"
   docker exec -it demo_app3_1 curl -s -X PUT -d @/app3.json "http://127.0.0.1:8500/v1/agent/service/register"
-  # Register DB Services
+  # Register DB services
   docker exec -it demo_db1_1 curl -s -X PUT -d @/db1.json "http://127.0.0.1:8500/v1/agent/service/register"
   docker exec -it demo_db2_1 curl -s -X PUT -d @/db2.json "http://127.0.0.1:8500/v1/agent/service/register"
   ```
 * Deregistering services
   ```
-  # Deregister postgres service
+  # Deregister Web service
   docker exec -it demo_web1_1 curl -s -X PUT "http://127.0.0.1:8500/v1/agent/service/deregister/web"
   docker exec -it demo_web2_1 curl -s -X PUT "http://127.0.0.1:8500/v1/agent/service/deregister/web"
   docker exec -it demo_web3_1 curl -s -X PUT "http://127.0.0.1:8500/v1/agent/service/deregister/web"
 
-  # Deregister service 2
+  # Deregister App services
   docker exec -it demo_app1_1 curl -s -X PUT "http://127.0.0.1:8500/v1/agent/service/deregister/app"
   docker exec -it demo_app2_1 curl -s -X PUT "http://127.0.0.1:8500/v1/agent/service/deregister/app"
   docker exec -it demo_app3_1 curl -s -X PUT "http://127.0.0.1:8500/v1/agent/service/deregister/app"
 
-  # Deregister service 1
+  # Deregister DB services
   docker exec -it demo_db1_1 curl -s -X PUT "http://127.0.0.1:8500/v1/agent/service/deregister/db"
   docker exec -it demo_db2_1 curl -s -X PUT "http://127.0.0.1:8500/v1/agent/service/deregister/db"
   ```
